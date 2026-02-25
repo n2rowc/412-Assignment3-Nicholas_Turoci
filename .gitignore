@@ -1,0 +1,10 @@
+# Ignore design doc and assets
+predeliverables/
+
+# macOS noise
+.DS_Store
+
+# Build artifacts (future)
+*.o
+a.out
+*.log
