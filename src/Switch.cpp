@@ -4,19 +4,29 @@ Switch::Switch(LoadBalancer* processingLB, LoadBalancer* streamingLB)
     : processing_lb_(processingLB),
       streaming_lb_(streamingLB),
       stats_{} {
-    // TODO
+        if (processingLB == nullptr || streamingLB == nullptr) {
+            throw std::invalid_argument("LoadBalancers cannot be null");
+        }
 }
 
 void Switch::routeRequest(const Request& request) {
-    // TODO
+    if (request.job_type == 'P') {
+        processing_lb_->getQueue().enqueue(request);
+        stats_.routed_to_processing++;
+    }
+    else if (request.job_type == 'S') {
+        streaming_lb_->getQueue().enqueue(request);
+        stats_.routed_to_streaming++;
+    }
 }
 
 void Switch::runCycle() {
-    // TODO
+    processing_lb_->runCycle();
+    streaming_lb_->runCycle();
 }
 
 SwitchStats Switch::getStats() const {
-    // TODO
-    return stats_;
+    SwitchStats stats = stats_;
+    return stats;
 }
 

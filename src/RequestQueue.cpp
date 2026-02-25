@@ -2,26 +2,25 @@
 
 RequestQueue::RequestQueue()
     : queue_() {
-    // TODO
+
 }
 
 void RequestQueue::enqueue(const Request& request) {
-    // TODO
+    queue_.push(request);
 }
 
 Request RequestQueue::dequeue() {
-    // TODO
-    return Request{};
+    Request request = queue_.front();
+    queue_.pop();
+    return request;
 }
 
 bool RequestQueue::isEmpty() const {
-    // TODO
-    return true;
+    return queue_.empty();
 }
 
 int RequestQueue::size() const {
-    // TODO
-    return 0;
+    return static_cast<int>(queue_.size());
 }
 
 
