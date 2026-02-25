@@ -41,6 +41,11 @@ void LoadBalancer::removeServer() {
 
 void LoadBalancer::runCycle() {
     current_time_++;
+    for (size_t i = 0; i < servers_.size(); i++) {
+        if (servers_[i]->processRequest(current_time_)) {
+            total_requests_processed_++;
+        }
+    }
     if (request_probability_ > 0.0 && (rand() / static_cast<double>(RAND_MAX)) < request_probability_) {
         Request r = generateRandomRequest();
         if (!ip_blocker_.isBlocked(r.ip_in)) {
@@ -93,8 +98,8 @@ int LoadBalancer::getCurrentTime() const {
 
 void LoadBalancer::assignRequests() {
     for (int i = 0; i < servers_.size(); i++) {
-        if (servers_[i]->isAvailable()) {
-            servers_[i]->assignRequest(request_queue_.dequeue());
+        if (!request_queue_.isEmpty() && servers_[i]->isAvailable()) {
+            servers_[i]->assignRequest(request_queue_.dequeue(), current_time_);
         }
     }
 }

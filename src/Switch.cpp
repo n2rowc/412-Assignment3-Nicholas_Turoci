@@ -1,12 +1,13 @@
 #include "Switch.h"
+#include <stdexcept>
 
 Switch::Switch(LoadBalancer* processingLB, LoadBalancer* streamingLB)
     : processing_lb_(processingLB),
       streaming_lb_(streamingLB),
       stats_{} {
-        if (processingLB == nullptr || streamingLB == nullptr) {
-            throw std::invalid_argument("LoadBalancers cannot be null");
-        }
+    if (processingLB == nullptr || streamingLB == nullptr) {
+        throw std::invalid_argument("LoadBalancers cannot be null");
+    }
 }
 
 void Switch::routeRequest(const Request& request) {
