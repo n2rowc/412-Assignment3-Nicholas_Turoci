@@ -1,33 +1,62 @@
+/**
+ * @file WebServer.h
+ * @brief Defines the WebServer class and ServerStats struct.
+ */
+
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
 #include "Request.h"
 
-// Summary statistics for a single web server.
+/**
+ * @struct ServerStats
+ * @brief Summary statistics for a single web server.
+ */
 struct ServerStats {
-    int server_id{};          // identifier for this server
-    int requests_processed{}; // how many requests it has completed
-    int total_busy_time{};    // total time spent working (optional to track)
+    /** @brief Identifier for this server. */
+    int server_id{};
+    /** @brief Number of requests this server has completed. */
+    int requests_processed{};
+    /** @brief Total time spent working (clock cycles). */
+    int total_busy_time{};
 };
 
-// Represents one web server that processes at most one Request at a time.
+/**
+ * @class WebServer
+ * @brief Represents one web server that processes at most one Request at a time.
+ */
 class WebServer {
 public:
-    // Construct a server with a given numeric id.
+    /**
+     * @brief Construct a server with a given numeric id.
+     * @param id Unique identifier for this server.
+     */
     explicit WebServer(int id);
 
-    // Give this server a new request to work on.
-    // currentTime is the global clock when the job is assigned.
+    /**
+     * @brief Give this server a new request to work on.
+     * @param request The request to process.
+     * @param currentTime The global simulation clock when the job is assigned.
+     */
     void assignRequest(const Request& request, int currentTime);
 
-    // Advance this server by one cycle at currentTime.
-    // Returns true if the current request finished this cycle.
+    /**
+     * @brief Advance this server by one cycle at currentTime.
+     * @param currentTime The current simulation clock.
+     * @return true if the current request finished this cycle.
+     */
     bool processRequest(int currentTime);
 
-    // True if the server is idle and ready for another request.
+    /**
+     * @brief Check if the server is idle and ready for another request.
+     * @return true if the server has no current request.
+     */
     bool isAvailable() const;
 
-    // Snapshot of this server's statistics.
+    /**
+     * @brief Get a snapshot of this server's statistics.
+     * @return ServerStats with server_id, requests_processed, total_busy_time.
+     */
     ServerStats getStats() const;
 
 private:
@@ -40,5 +69,3 @@ private:
 };
 
 #endif // WEBSERVER_H
-
-

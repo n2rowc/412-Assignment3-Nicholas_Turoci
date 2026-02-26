@@ -1,3 +1,8 @@
+/**
+ * @file LoadBalancer.h
+ * @brief Defines the LoadBalancer class and LoadBalancerStats struct.
+ */
+
 #ifndef LOADBALANCER_H
 #define LOADBALANCER_H
 
@@ -9,21 +14,43 @@
 #include "WebServer.h"
 #include "IPBlocker.h"
 
-// Aggregate statistics describing one LoadBalancer run.
+/**
+ * @struct LoadBalancerStats
+ * @brief Aggregate statistics describing one LoadBalancer run.
+ */
 struct LoadBalancerStats {
-    int current_time{};             // simulation time in clock cycles
-    int total_requests_generated{}; // how many requests were created
-    int total_requests_processed{}; // how many finished successfully
-    int total_requests_blocked{};   // how many were rejected by IPBlocker
-    int peak_queue_size{};          // largest queue length observed
-    int servers_added{};            // number of times we scaled up
-    int servers_removed{};          // number of times we scaled down
+    /** @brief Simulation time in clock cycles. */
+    int current_time{};
+    /** @brief Total requests created. */
+    int total_requests_generated{};
+    /** @brief Total requests finished successfully. */
+    int total_requests_processed{};
+    /** @brief Total requests rejected by IPBlocker. */
+    int total_requests_blocked{};
+    /** @brief Largest queue length observed. */
+    int peak_queue_size{};
+    /** @brief Number of times a server was added. */
+    int servers_added{};
+    /** @brief Number of times a server was removed. */
+    int servers_removed{};
 };
 
-// Manages the request queue, web server pool, and scaling behavior.
+/**
+ * @class LoadBalancer
+ * @brief Manages the request queue, web server pool, and scaling behavior.
+ */
 class LoadBalancer {
 public:
-    // Configure initial server count, scaling thresholds, and request-generation config.
+    /**
+     * @brief Construct the load balancer with configuration.
+     * @param initialServers Number of web servers to start with.
+     * @param minQueueMultiplier Scale-down threshold (queue per server).
+     * @param maxQueueMultiplier Scale-up threshold (queue per server).
+     * @param scaleCooldown Cycles between scaling checks.
+     * @param minProcessTime Minimum request processing time (config).
+     * @param maxProcessTime Maximum request processing time (config).
+     * @param requestProbability Not used when request generation is in main.
+     */
     LoadBalancer(int initialServers,
                  int minQueueMultiplier = 50,
                  int maxQueueMultiplier = 80,
@@ -32,22 +59,37 @@ public:
                  int maxProcessTime     = 50,
                  double requestProbability = 0.05);
 
-    // Add or remove a single web server from the pool.
+    /** @brief Add one web server to the pool. */
     void addServer();
+    /** @brief Remove one web server from the pool (if any). */
     void removeServer();
 
-    // Execute one simulation cycle at the given time (process servers, assign, scale).
+    /**
+     * @brief Execute one simulation cycle at the given time.
+     * @param currentTime Current simulation clock.
+     */
     void runCycle(int currentTime);
 
-    // Access simulation statistics, queue, and IP blocker.
+    /** @brief Get current statistics. */
     LoadBalancerStats getStats() const;
+    /** @brief Get the request queue reference. */
     RequestQueue&     getQueue();
+    /** @brief Get the IP blocker reference. */
     IPBlocker&        getBlocker();
 
+    /** @brief Get the number of servers in the pool. */
     int getServerCount() const;
+    /** @brief Get the number of servers currently busy. */
     int getBusyServerCount() const;
+    /** @brief Get the current simulation time. */
     int getCurrentTime() const;
 
+    /**
+     * @brief Set optional log streams for add/remove server events.
+     * @param os Stream for plain-text log (or nullptr).
+     * @param name Label for this LB in log (e.g. "processing").
+     * @param htmlOs Stream for HTML log (or nullptr).
+     */
     void setLogStream(std::ostream* os, const std::string& name = "", std::ostream* htmlOs = nullptr);
 
 private:
@@ -83,5 +125,3 @@ private:
 };
 
 #endif // LOADBALANCER_H
-
-

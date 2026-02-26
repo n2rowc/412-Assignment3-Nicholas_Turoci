@@ -1,3 +1,8 @@
+/**
+ * @file LoadBalancer.cpp
+ * @brief Implementation of the LoadBalancer class.
+ */
+
 #include "LoadBalancer.h"
 #include <cstdlib>
 using namespace std;
@@ -151,16 +156,12 @@ void LoadBalancer::checkScaling() {
     int queue_size   = request_queue_.size();
     int server_count = static_cast<int>(servers_.size());
 
-    // If the queue is too long per server, add capacity.
     if (queue_size > server_count * max_queue_multiplier_) {
         addServer();
         last_scale_time_ = current_time_;
     }
-    // If the queue is very short and we have more than one server, remove capacity.
     else if (queue_size < server_count * min_queue_multiplier_ && server_count > 1) {
         removeServer();
         last_scale_time_ = current_time_;
     }
 }
-
-

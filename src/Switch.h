@@ -1,28 +1,55 @@
+/**
+ * @file Switch.h
+ * @brief Defines the Switch class for routing requests by job type (bonus).
+ */
+
 #ifndef SWITCH_H
 #define SWITCH_H
 
 #include "LoadBalancer.h"
 #include "Request.h"
 
-// Statistics for how many jobs were routed to each LoadBalancer.
+/**
+ * @struct SwitchStats
+ * @brief Statistics for how many jobs were routed to each LoadBalancer.
+ */
 struct SwitchStats {
-    int routed_to_processing{}; // 'P' jobs
-    int routed_to_streaming{};  // 'S' jobs
+    /** @brief Count of 'P' (processing) jobs routed. */
+    int routed_to_processing{};
+    /** @brief Count of 'S' (streaming) jobs routed. */
+    int routed_to_streaming{};
 };
 
-// Bonus: routes requests to different load balancers by job_type.
+/**
+ * @class Switch
+ * @brief Routes requests to different load balancers by job_type ('P' or 'S').
+ */
 class Switch {
 public:
-    // processingLB handles 'P' jobs, streamingLB handles 'S' jobs.
+    /**
+     * @brief Construct the switch with two load balancers.
+     * @param processingLB Handles 'P' (processing) jobs.
+     * @param streamingLB Handles 'S' (streaming) jobs.
+     * @throws std::invalid_argument if either pointer is null.
+     */
     Switch(LoadBalancer* processingLB, LoadBalancer* streamingLB);
 
-    // Send a single Request to the correct LoadBalancer based on job_type.
+    /**
+     * @brief Send a single Request to the correct LoadBalancer based on job_type.
+     * @param request The request to route ('P' -> processing, 'S' -> streaming).
+     */
     void routeRequest(const Request& request);
 
-    // Advance both managed load balancers by one cycle at the given time.
+    /**
+     * @brief Advance both managed load balancers by one cycle.
+     * @param currentTime The current simulation clock.
+     */
     void runCycle(int currentTime);
 
-    // Snapshot of routing statistics.
+    /**
+     * @brief Get a snapshot of routing statistics.
+     * @return SwitchStats with routed_to_processing and routed_to_streaming.
+     */
     SwitchStats getStats() const;
 
 private:
@@ -32,5 +59,3 @@ private:
 };
 
 #endif // SWITCH_H
-
-

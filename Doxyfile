@@ -1,0 +1,23 @@
+# Doxyfile for Load Balancer Simulation (CSCE 412)
+# Generate with: doxygen Doxyfile
+# HTML output will be in html/ (upload to people.tamu.edu)
+
+PROJECT_NAME           = "Load Balancer Simulation"
+PROJECT_NUMBER         = "1"
+PROJECT_BRIEF          = "CSCE 412 Project 3 - Load balancer with dynamic scaling"
+OUTPUT_DIRECTORY       = .
+INPUT                  = src
+FILE_PATTERNS          = *.cpp *.h
+RECURSIVE              = NO
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+QUIET                  = NO
+JAVADOC_AUTOBRIEF      = YES

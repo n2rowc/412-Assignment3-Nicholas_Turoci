@@ -1,3 +1,8 @@
+/**
+ * @file WebServer.cpp
+ * @brief Implementation of the WebServer class.
+ */
+
 #include "WebServer.h"
 
 WebServer::WebServer(int id)
@@ -40,4 +45,3 @@ ServerStats WebServer::getStats() const {
     stats.total_busy_time    = total_busy_time_;
     return stats;
 }
-

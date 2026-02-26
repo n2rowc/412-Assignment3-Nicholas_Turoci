@@ -1,3 +1,9 @@
+/**
+ * @file main.cpp
+ * @brief Entry point and simulation driver for the Load Balancer project.
+ *        Reads config, creates load balancers and switch, runs the simulation, writes logs.
+ */
+
 #include "LoadBalancer.h"
 #include "Switch.h"
 #include "Request.h"
@@ -11,6 +17,13 @@
 
 using namespace std;
 
+/**
+ * @brief Generate a random Request with random IPs, processing time, and job type.
+ * @param currentTime Simulation clock for arrival_time.
+ * @param minProcessTime Minimum processing time (inclusive).
+ * @param maxProcessTime Maximum processing time (inclusive).
+ * @return A new Request with random fields.
+ */
 static Request generateRandomRequest(int currentTime, int minProcessTime, int maxProcessTime) {
     Request r;
     r.ip_in = "192.168." + to_string(rand() % 256) + "." + to_string(rand() % 256);
@@ -22,6 +35,10 @@ static Request generateRandomRequest(int currentTime, int minProcessTime, int ma
     return r;
 }
 
+/**
+ * @brief Main entry: load config, create LBs and switch, run simulation, write text and HTML logs.
+ * @return 0 on success, 1 on config or log file open error.
+ */
 int main() {
     int    initial_servers      = 0;
     int    simulation_time      = 0;
@@ -36,7 +53,7 @@ int main() {
 
     srand(static_cast<unsigned int>(time(nullptr)));
     //open config file
-    ifstream config_file("lb_config3.txt");
+    ifstream config_file("lb_config.txt");
     if (!config_file.is_open()) {
         cerr << "Error: could not open config file" << endl;
         return 1;

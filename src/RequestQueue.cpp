@@ -1,3 +1,8 @@
+/**
+ * @file RequestQueue.cpp
+ * @brief Implementation of the RequestQueue class.
+ */
+
 #include "RequestQueue.h"
 
 RequestQueue::RequestQueue()
@@ -22,5 +27,3 @@ bool RequestQueue::isEmpty() const {
 int RequestQueue::size() const {
     return static_cast<int>(queue_.size());
 }
-
-

@@ -1,3 +1,8 @@
+/**
+ * @file Switch.cpp
+ * @brief Implementation of the Switch class.
+ */
+
 #include "Switch.h"
 #include <stdexcept>
 
@@ -30,4 +35,3 @@ SwitchStats Switch::getStats() const {
     SwitchStats stats = stats_;
     return stats;
 }
-

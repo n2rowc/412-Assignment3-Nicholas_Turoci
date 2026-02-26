@@ -1,3 +1,8 @@
+/**
+ * @file RequestQueue.h
+ * @brief FIFO queue for Request objects.
+ */
+
 #ifndef REQUESTQUEUE_H
 #define REQUESTQUEUE_H
 
@@ -5,22 +10,37 @@
 
 #include "Request.h"
 
-// Simple FIFO queue for Request objects.
+/**
+ * @class RequestQueue
+ * @brief Simple FIFO queue for Request objects.
+ */
 class RequestQueue {
 public:
-    // Construct an empty queue.
+    /** @brief Construct an empty queue. */
     RequestQueue();
 
-    // Add a request to the back of the queue.
+    /**
+     * @brief Add a request to the back of the queue.
+     * @param request The request to enqueue.
+     */
     void enqueue(const Request& request);
 
-    // Remove and return the request at the front of the queue.
+    /**
+     * @brief Remove and return the request at the front of the queue.
+     * @return The request that was at the front.
+     */
     Request dequeue();
 
-    // True if the queue has no pending requests.
+    /**
+     * @brief Check if the queue has no pending requests.
+     * @return true if the queue is empty.
+     */
     bool isEmpty() const;
 
-    // Number of pending requests.
+    /**
+     * @brief Get the number of pending requests.
+     * @return The current queue size.
+     */
     int size() const;
 
 private:
@@ -28,6 +48,3 @@ private:
 };
 
 #endif // REQUESTQUEUE_H
-
-
-
