@@ -21,9 +21,9 @@ void Switch::routeRequest(const Request& request) {
     }
 }
 
-void Switch::runCycle() {
-    processing_lb_->runCycle();
-    streaming_lb_->runCycle();
+void Switch::runCycle(int currentTime) {
+    processing_lb_->runCycle(currentTime);
+    streaming_lb_->runCycle(currentTime);
 }
 
 SwitchStats Switch::getStats() const {
