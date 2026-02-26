@@ -90,18 +90,61 @@ int main() {
     //prefill initial queue
     processing_lb.generateInitialQueue();
     streaming_lb.generateInitialQueue();
-    //open log file
-    //write starting stats
-    
-    
-    //run simulation
+
+    int starting_queue_size = processing_lb.getQueue().size() + streaming_lb.getQueue().size();
+
+    string log_path = log_file.empty() ? "load_balancer.log" : log_file;
+    ofstream log_stream(log_path);
+    if (!log_stream.is_open()) {
+        cerr << "Error: could not open log file " << log_path << endl;
+        return 1;
+    }
+
+    log_stream << "========================================\n";
+    log_stream << "Project 3 - Load Balancer Log\n";
+    log_stream << "========================================\n\n";
+
+    log_stream << "--- Simulation configuration ---\n";
+    log_stream << "Clock cycles:        " << simulation_time << "\n";
+    log_stream << "Initial servers:     " << initial_servers << " (per load balancer)\n";
+    log_stream << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n";
+    log_stream << "Request probability: " << request_probability << "\n\n";
+
+    log_stream << "--- Basic logs ---\n";
+    log_stream << "Starting queue size: " << starting_queue_size << "\n";
+    log_stream << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n";
+    log_stream << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n\n";
+
     for (int i = 0; i < simulation_time; i++) {
         sw.runCycle();
     }
-    //write ending stats
-    //close log file
 
-    //free resources
+    LoadBalancerStats proc_stats = processing_lb.getStats();
+    LoadBalancerStats stream_stats = streaming_lb.getStats();
+    int ending_queue_size = processing_lb.getQueue().size() + streaming_lb.getQueue().size();
+
+    log_stream << "--- End status ---\n";
+    log_stream << "Ending queue size:    " << ending_queue_size << "\n";
+    log_stream << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n";
+    log_stream << "Remaining in queue:  " << ending_queue_size << "\n";
+    log_stream << "Active servers (busy): " << processing_lb.getBusyServerCount() + streaming_lb.getBusyServerCount() << "\n";
+    log_stream << "Idle servers:        " << (processing_lb.getServerCount() - processing_lb.getBusyServerCount()) + (streaming_lb.getServerCount() - streaming_lb.getBusyServerCount()) << "\n";
+    log_stream << "Rejected/discarded:   " << proc_stats.total_requests_blocked + stream_stats.total_requests_blocked << " (blocked by IP)\n\n";
+
+    log_stream << "--- Additional information ---\n";
+    log_stream << "Total requests generated: " << proc_stats.total_requests_generated + stream_stats.total_requests_generated << "\n";
+    log_stream << "Total requests processed: " << proc_stats.total_requests_processed + stream_stats.total_requests_processed << "\n";
+    log_stream << "Peak queue size (combined): " << proc_stats.peak_queue_size + stream_stats.peak_queue_size << "\n";
+    log_stream << "Servers added (dynamic):   " << proc_stats.servers_added + stream_stats.servers_added << "\n";
+    log_stream << "Servers removed (dynamic): " << proc_stats.servers_removed + stream_stats.servers_removed << "\n";
+    log_stream << "Final server count:        " << processing_lb.getServerCount() + streaming_lb.getServerCount() << " (total across both LBs)\n";
+
+    log_stream << "\n========================================\n";
+    log_stream << "End of log\n";
+    log_stream << "========================================\n";
+
+    log_stream.close();
+
     return 0;
 }
 

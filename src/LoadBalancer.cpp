@@ -57,30 +57,30 @@ void LoadBalancer::runCycle() {
     }
     assignRequests();
     checkScaling();
-    if (request_queue_.size() > static_cast<size_t>(peak_queue_size_)) {
-        peak_queue_size_ = static_cast<int>(request_queue_.size());
+    if (request_queue_.size() > peak_queue_size_) {
+        peak_queue_size_ = request_queue_.size();
     }
 }
 
 void LoadBalancer::generateInitialQueue() {
-    for (int i = 0; i < servers_.size() * 100; i++) {
+    for (int i = 0; i < static_cast<int>(servers_.size()) * 100; i++) {
         request_queue_.enqueue(generateRandomRequest());
     }
 }
 
 LoadBalancerStats LoadBalancer::getStats() const {
-    stats_.current_time = current_time_;
-    stats_.total_requests_generated = total_requests_generated_;
-    stats_.total_requests_processed = total_requests_processed_;
-    stats_.total_requests_blocked = total_requests_blocked_;
-    stats_.peak_queue_size = peak_queue_size_;
-    stats_.servers_added = servers_added_;
-    stats_.servers_removed = servers_removed_;
-    return stats_;
+    LoadBalancerStats s{};
+    s.current_time             = current_time_;
+    s.total_requests_generated = total_requests_generated_;
+    s.total_requests_processed = total_requests_processed_;
+    s.total_requests_blocked   = total_requests_blocked_;
+    s.peak_queue_size          = peak_queue_size_;
+    s.servers_added            = servers_added_;
+    s.servers_removed          = servers_removed_;
+    return s;
 }
 
 RequestQueue& LoadBalancer::getQueue() {
-    RequestQueue& request_queue = request_queue_;
     return request_queue_;
 }
 
@@ -92,12 +92,22 @@ int LoadBalancer::getServerCount() const {
     return static_cast<int>(servers_.size());
 }
 
+int LoadBalancer::getBusyServerCount() const {
+    int busy = 0;
+    for (size_t i = 0; i < servers_.size(); i++) {
+        if (!servers_[i]->isAvailable()) {
+            busy++;
+        }
+    }
+    return busy;
+}
+
 int LoadBalancer::getCurrentTime() const {
     return current_time_;
 }
 
 void LoadBalancer::assignRequests() {
-    for (int i = 0; i < servers_.size(); i++) {
+    for (size_t i = 0; i < servers_.size(); i++) {
         if (!request_queue_.isEmpty() && servers_[i]->isAvailable()) {
             servers_[i]->assignRequest(request_queue_.dequeue(), current_time_);
         }
@@ -105,11 +115,23 @@ void LoadBalancer::assignRequests() {
 }
 
 void LoadBalancer::checkScaling() {
-    if (request_queue_.size() < servers_.size() * min_queue_multiplier_) {
-        addServer();
+    int queue_size   = request_queue_.size();
+    int server_count = static_cast<int>(servers_.size());
+
+    // Enforce a cooldown between scaling actions so we don't thrash.
+    if (current_time_ - last_scale_time_ < scale_cooldown_) {
+        return;
     }
-    else if (request_queue_.size() > servers_.size() * max_queue_multiplier_) {
+
+    // If the queue is too long per server, add capacity.
+    if (queue_size > server_count * max_queue_multiplier_) {
+        addServer();
+        last_scale_time_ = current_time_;
+    }
+    // If the queue is very short and we have more than one server, remove capacity.
+    else if (queue_size < server_count * min_queue_multiplier_ && server_count > 1) {
         removeServer();
+        last_scale_time_ = current_time_;
     }
 }
 

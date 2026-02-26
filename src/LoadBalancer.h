@@ -47,6 +47,7 @@ public:
     IPBlocker&        getBlocker();
 
     int getServerCount() const;
+    int getBusyServerCount() const;
     int getCurrentTime() const;
 
 private:
