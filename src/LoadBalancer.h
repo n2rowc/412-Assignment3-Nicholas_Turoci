@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <ostream>
 
 #include "RequestQueue.h"
 #include "WebServer.h"
@@ -47,6 +48,8 @@ public:
     int getBusyServerCount() const;
     int getCurrentTime() const;
 
+    void setLogStream(std::ostream* os, const std::string& name = "");
+
 private:
     void assignRequests();
     void checkScaling();
@@ -64,6 +67,9 @@ private:
     int min_process_time_{5};
     int max_process_time_{50};
     double request_probability_{0.05};
+
+    std::ostream* log_stream_{nullptr};
+    std::string   log_name_;
 
     int total_requests_generated_{0};
     int total_requests_processed_{0};

@@ -27,15 +27,37 @@ LoadBalancer::LoadBalancer(int initialServers,
 }
 
 void LoadBalancer::addServer() {
+    int queue_size = request_queue_.size();
+    int servers_before = static_cast<int>(servers_.size());
     servers_.push_back(new WebServer(servers_.size()));
     servers_added_++;
+    int servers_after = static_cast<int>(servers_.size());
+    if (log_stream_) {
+        int avg_before = servers_before > 0 ? queue_size / servers_before : 0;
+        int avg_after  = servers_after > 0 ? queue_size / servers_after : 0;
+        *log_stream_ << "[" << log_name_ << "] Server ADDED: servers " << servers_before << " -> " << servers_after
+                     << ", queue size=" << queue_size
+                     << ", avg requests/server before=" << avg_before << " after=" << avg_after
+                     << ", cycle=" << current_time_ << "\n";
+    }
 }
 
 void LoadBalancer::removeServer() {
     if (!servers_.empty()) {
+        int queue_size = request_queue_.size();
+        int servers_before = static_cast<int>(servers_.size());
         delete servers_.back();
         servers_.pop_back();
         servers_removed_++;
+        int servers_after = static_cast<int>(servers_.size());
+        if (log_stream_) {
+            int avg_before = servers_before > 0 ? queue_size / servers_before : 0;
+            int avg_after  = servers_after > 0 ? queue_size / servers_after : 0;
+            *log_stream_ << "[" << log_name_ << "] Server REMOVED: servers " << servers_before << " -> " << servers_after
+                         << ", queue size=" << queue_size
+                         << ", avg requests/server before=" << avg_before << " after=" << avg_after
+                         << ", cycle=" << current_time_ << "\n";
+        }
     }
 }
 
@@ -47,7 +69,9 @@ void LoadBalancer::runCycle(int currentTime) {
         }
     }
     assignRequests();
-    checkScaling();
+    if (scale_cooldown_ > 0 && (current_time_ % scale_cooldown_) == 0) {
+        checkScaling();
+    }
     if (request_queue_.size() > peak_queue_size_) {
         peak_queue_size_ = request_queue_.size();
     }
@@ -91,6 +115,11 @@ int LoadBalancer::getCurrentTime() const {
     return current_time_;
 }
 
+void LoadBalancer::setLogStream(std::ostream* os, const std::string& name) {
+    log_stream_ = os;
+    log_name_   = name;
+}
+
 void LoadBalancer::assignRequests() {
     for (size_t i = 0; i < servers_.size(); i++) {
         if (!request_queue_.isEmpty() && servers_[i]->isAvailable()) {
@@ -102,11 +131,6 @@ void LoadBalancer::assignRequests() {
 void LoadBalancer::checkScaling() {
     int queue_size   = request_queue_.size();
     int server_count = static_cast<int>(servers_.size());
-
-    // Enforce a cooldown between scaling actions so we don't thrash.
-    if (current_time_ - last_scale_time_ < scale_cooldown_) {
-        return;
-    }
 
     // If the queue is too long per server, add capacity.
     if (queue_size > server_count * max_queue_multiplier_) {

@@ -36,7 +36,7 @@ int main() {
 
     srand(static_cast<unsigned int>(time(nullptr)));
     //open config file
-    ifstream config_file("lb_config.txt");
+    ifstream config_file("lb_config3.txt");
     if (!config_file.is_open()) {
         cerr << "Error: could not open config file" << endl;
         return 1;
@@ -102,6 +102,7 @@ int main() {
 
     int total_requests_generated = initial_servers * 100 * 2;
     int total_requests_blocked   = 0;
+
     //prefill initial queue
     for (int i = 0; i < total_requests_generated; i++) {
         Request r = generateRandomRequest(0, min_process_time, max_process_time);
@@ -131,6 +132,10 @@ int main() {
     log_stream << "Starting queue size: " << starting_queue_size << "\n";
     log_stream << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n";
     log_stream << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n\n";
+
+    log_stream << "--- Scaling events (server add/remove) ---\n";
+    processing_lb.setLogStream(&log_stream, "processing");
+    streaming_lb.setLogStream(&log_stream, "streaming");
 
     for (int i = 0; i < simulation_time; i++) {
         if (request_probability > 0.0 && (rand() / static_cast<double>(RAND_MAX)) < request_probability) {
