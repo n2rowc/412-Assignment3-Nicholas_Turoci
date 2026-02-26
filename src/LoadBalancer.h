@@ -48,7 +48,7 @@ public:
     int getBusyServerCount() const;
     int getCurrentTime() const;
 
-    void setLogStream(std::ostream* os, const std::string& name = "");
+    void setLogStream(std::ostream* os, const std::string& name = "", std::ostream* htmlOs = nullptr);
 
 private:
     void assignRequests();
@@ -69,6 +69,7 @@ private:
     double request_probability_{0.05};
 
     std::ostream* log_stream_{nullptr};
+    std::ostream* log_html_{nullptr};
     std::string   log_name_;
 
     int total_requests_generated_{0};

@@ -118,6 +118,35 @@ int main() {
         return 1;
     }
 
+    string html_path = log_path;
+    size_t dot = html_path.rfind('.');
+    if (dot != string::npos) {
+        html_path = html_path.substr(0, dot) + ".html";
+    } else {
+        html_path += ".html";
+    }
+    ofstream html_stream(html_path);
+    if (!html_stream.is_open()) {
+        cerr << "Error: could not open HTML log file " << html_path << endl;
+        return 1;
+    }
+
+    html_stream << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Load Balancer Log</title>\n<style>\n"
+                << "body { font-family: sans-serif; margin: 1.5em; background: #f8f9fa; }\n"
+                << "h1 { color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 0.3em; }\n"
+                << "h2 { color: #495057; margin-top: 1.2em; }\n"
+                << "pre, .block { background: #fff; padding: 0.8em; border-radius: 6px; border: 1px solid #dee2e6; }\n"
+                << ".lb-name { color: #0dcaf0; font-weight: bold; }\n"
+                << ".added { color: #198754; font-weight: bold; }\n"
+                << ".removed { color: #fd7e14; font-weight: bold; }\n"
+                << "p { margin: 0.35em 0; }\n"
+                << "</style>\n</head>\n<body>\n";
+    html_stream << "<h1>Project 3 - Load Balancer Log</h1>\n\n";
+    html_stream << "<h2>Simulation configuration</h2>\n<pre>Clock cycles:        " << simulation_time << "\n"
+                << "Initial servers:     " << initial_servers << " (per load balancer)\n"
+                << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n"
+                << "Request probability: " << request_probability << "</pre>\n\n";
+
     log_stream << "========================================\n";
     log_stream << "Project 3 - Load Balancer Log\n";
     log_stream << "========================================\n\n";
@@ -133,9 +162,14 @@ int main() {
     log_stream << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n";
     log_stream << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n\n";
 
+    html_stream << "<h2>Basic logs</h2>\n<pre>Starting queue size: " << starting_queue_size << "\n"
+                << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n"
+                << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles</pre>\n\n";
+
     log_stream << "--- Scaling events (server add/remove) ---\n";
-    processing_lb.setLogStream(&log_stream, "processing");
-    streaming_lb.setLogStream(&log_stream, "streaming");
+    html_stream << "<h2>Scaling events (server add/remove)</h2>\n<div class=\"block\">\n";
+    processing_lb.setLogStream(&log_stream, "processing", &html_stream);
+    streaming_lb.setLogStream(&log_stream, "streaming", &html_stream);
 
     for (int i = 0; i < simulation_time; i++) {
         if (request_probability > 0.0 && (rand() / static_cast<double>(RAND_MAX)) < request_probability) {
@@ -154,6 +188,8 @@ int main() {
     LoadBalancerStats stream_stats = streaming_lb.getStats();
     int ending_queue_size = processing_lb.getQueue().size() + streaming_lb.getQueue().size();
 
+    html_stream << "</div>\n\n";
+
     log_stream << "--- End status ---\n";
     log_stream << "Ending queue size:    " << ending_queue_size << "\n";
     log_stream << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n";
@@ -161,6 +197,13 @@ int main() {
     log_stream << "Active servers (busy): " << processing_lb.getBusyServerCount() + streaming_lb.getBusyServerCount() << "\n";
     log_stream << "Idle servers:        " << (processing_lb.getServerCount() - processing_lb.getBusyServerCount()) + (streaming_lb.getServerCount() - streaming_lb.getBusyServerCount()) << "\n";
     log_stream << "Rejected/discarded:   " << total_requests_blocked << " (blocked by IP)\n\n";
+
+    html_stream << "<h2>End status</h2>\n<pre>Ending queue size:    " << ending_queue_size << "\n"
+                << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n"
+                << "Remaining in queue:  " << ending_queue_size << "\n"
+                << "Active servers (busy): " << processing_lb.getBusyServerCount() + streaming_lb.getBusyServerCount() << "\n"
+                << "Idle servers:        " << (processing_lb.getServerCount() - processing_lb.getBusyServerCount()) + (streaming_lb.getServerCount() - streaming_lb.getBusyServerCount()) << "\n"
+                << "Rejected/discarded:   " << total_requests_blocked << " (blocked by IP)</pre>\n\n";
 
     log_stream << "--- Additional information ---\n";
     log_stream << "Total requests generated: " << total_requests_generated << "\n";
@@ -170,11 +213,21 @@ int main() {
     log_stream << "Servers removed (dynamic): " << proc_stats.servers_removed + stream_stats.servers_removed << "\n";
     log_stream << "Final server count:        " << processing_lb.getServerCount() + streaming_lb.getServerCount() << " (total across both LBs)\n";
 
+    html_stream << "<h2>Additional information</h2>\n<pre>Total requests generated: " << total_requests_generated << "\n"
+                << "Total requests processed: " << proc_stats.total_requests_processed + stream_stats.total_requests_processed << "\n"
+                << "Peak queue size (combined): " << proc_stats.peak_queue_size + stream_stats.peak_queue_size << "\n"
+                << "Servers added (dynamic):   " << proc_stats.servers_added + stream_stats.servers_added << "\n"
+                << "Servers removed (dynamic): " << proc_stats.servers_removed + stream_stats.servers_removed << "\n"
+                << "Final server count:        " << processing_lb.getServerCount() + streaming_lb.getServerCount() << " (total across both LBs)</pre>\n\n";
+
     log_stream << "\n========================================\n";
     log_stream << "End of log\n";
     log_stream << "========================================\n";
 
+    html_stream << "<p><strong>End of log</strong></p>\n</body>\n</html>\n";
+
     log_stream.close();
+    html_stream.close();
 
     return 0;
 }

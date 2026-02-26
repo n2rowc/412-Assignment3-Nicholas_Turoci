@@ -40,6 +40,15 @@ void LoadBalancer::addServer() {
                      << ", avg requests/server before=" << avg_before << " after=" << avg_after
                      << ", cycle=" << current_time_ << "\n";
     }
+    if (log_html_) {
+        int avg_before = servers_before > 0 ? queue_size / servers_before : 0;
+        int avg_after  = servers_after > 0 ? queue_size / servers_after : 0;
+        *log_html_ << "<p><span class=\"lb-name\">[" << log_name_ << "]</span> <span class=\"added\">Server ADDED:</span> "
+                   << "servers " << servers_before << " &rarr; " << servers_after
+                   << ", queue size=" << queue_size
+                   << ", avg requests/server before=" << avg_before << " after=" << avg_after
+                   << ", cycle=" << current_time_ << "</p>\n";
+    }
 }
 
 void LoadBalancer::removeServer() {
@@ -57,6 +66,15 @@ void LoadBalancer::removeServer() {
                          << ", queue size=" << queue_size
                          << ", avg requests/server before=" << avg_before << " after=" << avg_after
                          << ", cycle=" << current_time_ << "\n";
+        }
+        if (log_html_) {
+            int avg_before = servers_before > 0 ? queue_size / servers_before : 0;
+            int avg_after  = servers_after > 0 ? queue_size / servers_after : 0;
+            *log_html_ << "<p><span class=\"lb-name\">[" << log_name_ << "]</span> <span class=\"removed\">Server REMOVED:</span> "
+                       << "servers " << servers_before << " &rarr; " << servers_after
+                       << ", queue size=" << queue_size
+                       << ", avg requests/server before=" << avg_before << " after=" << avg_after
+                       << ", cycle=" << current_time_ << "</p>\n";
         }
     }
 }
@@ -115,8 +133,9 @@ int LoadBalancer::getCurrentTime() const {
     return current_time_;
 }
 
-void LoadBalancer::setLogStream(std::ostream* os, const std::string& name) {
+void LoadBalancer::setLogStream(std::ostream* os, const std::string& name, std::ostream* htmlOs) {
     log_stream_ = os;
+    log_html_   = htmlOs;
     log_name_   = name;
 }
 
