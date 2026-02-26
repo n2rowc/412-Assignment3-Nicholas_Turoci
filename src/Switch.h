@@ -19,8 +19,8 @@ public:
     // Send a single Request to the correct LoadBalancer based on job_type.
     void routeRequest(const Request& request);
 
-    // Advance both managed load balancers by one cycle.
-    void runCycle();
+    // Advance both managed load balancers by one cycle at the given time.
+    void runCycle(int currentTime);
 
     // Snapshot of routing statistics.
     SwitchStats getStats() const;

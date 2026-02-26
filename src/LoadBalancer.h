@@ -35,11 +35,8 @@ public:
     void addServer();
     void removeServer();
 
-    // Execute one simulation cycle (update servers, queue, and scaling).
-    void runCycle();
-
-    // Fill the queue with an initial batch of requests (servers * 100).
-    void generateInitialQueue();
+    // Execute one simulation cycle at the given time (process servers, assign, scale).
+    void runCycle(int currentTime);
 
     // Access simulation statistics, queue, and IP blocker.
     LoadBalancerStats getStats() const;
@@ -51,10 +48,8 @@ public:
     int getCurrentTime() const;
 
 private:
-    // Helpers used internally by runCycle().
-    void    assignRequests();          // give queued work to available servers
-    void    checkScaling();           // decide whether to add/remove servers
-    Request generateRandomRequest() const; // build a new random Request
+    void assignRequests();
+    void checkScaling();
 
 private:
     RequestQueue            request_queue_;

@@ -39,32 +39,17 @@ void LoadBalancer::removeServer() {
     }
 }
 
-void LoadBalancer::runCycle() {
-    current_time_++;
+void LoadBalancer::runCycle(int currentTime) {
+    current_time_ = currentTime;
     for (size_t i = 0; i < servers_.size(); i++) {
         if (servers_[i]->processRequest(current_time_)) {
             total_requests_processed_++;
-        }
-    }
-    if (request_probability_ > 0.0 && (rand() / static_cast<double>(RAND_MAX)) < request_probability_) {
-        Request r = generateRandomRequest();
-        if (!ip_blocker_.isBlocked(r.ip_in)) {
-            request_queue_.enqueue(r);
-            total_requests_generated_++;
-        } else {
-            total_requests_blocked_++;
         }
     }
     assignRequests();
     checkScaling();
     if (request_queue_.size() > peak_queue_size_) {
         peak_queue_size_ = request_queue_.size();
-    }
-}
-
-void LoadBalancer::generateInitialQueue() {
-    for (int i = 0; i < static_cast<int>(servers_.size()) * 100; i++) {
-        request_queue_.enqueue(generateRandomRequest());
     }
 }
 
@@ -135,24 +120,4 @@ void LoadBalancer::checkScaling() {
     }
 }
 
-Request LoadBalancer::generateRandomRequest() const {
-    Request request;
-    int ip_c = rand() % 256;
-    int ip_d = rand() % 256;
-    request.ip_in = "192.168." + to_string(ip_c) + "." + to_string(ip_d);
-
-    int ip2_b = rand() % 256;
-    int ip2_c = rand() % 256;
-    int ip2_d = rand() % 256;
-    request.ip_out = "10." + to_string(ip2_b) + "." +
-                     to_string(ip2_c) + "." + to_string(ip2_d);
-
-    int range = max_process_time_ - min_process_time_ + 1;
-    request.processing_time = min_process_time_ + (rand() % range);
-
-    request.job_type = (rand() % 2 == 0) ? 'P' : 'S';
-    request.arrival_time = current_time_;
-
-    return request;
-}
 

@@ -1,13 +1,26 @@
 #include "LoadBalancer.h"
 #include "Switch.h"
+#include "Request.h"
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <cstdlib>
 
 using namespace std;
+
+static Request generateRandomRequest(int currentTime, int minProcessTime, int maxProcessTime) {
+    Request r;
+    r.ip_in = "192.168." + to_string(rand() % 256) + "." + to_string(rand() % 256);
+    r.ip_out = "10." + to_string(rand() % 256) + "." + to_string(rand() % 256) + "." + to_string(rand() % 256);
+    int range = maxProcessTime - minProcessTime + 1;
+    r.processing_time = minProcessTime + (rand() % range);
+    r.job_type = (rand() % 2 == 0) ? 'P' : 'S';
+    r.arrival_time = currentTime;
+    return r;
+}
 
 int main() {
     int    initial_servers      = 0;
@@ -87,9 +100,13 @@ int main() {
         streaming_lb.getBlocker().addBlockedRange(range);
     }
 
+    int total_requests_generated = initial_servers * 100 * 2;
+    int total_requests_blocked   = 0;
     //prefill initial queue
-    processing_lb.generateInitialQueue();
-    streaming_lb.generateInitialQueue();
+    for (int i = 0; i < total_requests_generated; i++) {
+        Request r = generateRandomRequest(0, min_process_time, max_process_time);
+        sw.routeRequest(r);
+    }
 
     int starting_queue_size = processing_lb.getQueue().size() + streaming_lb.getQueue().size();
 
@@ -116,7 +133,16 @@ int main() {
     log_stream << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n\n";
 
     for (int i = 0; i < simulation_time; i++) {
-        sw.runCycle();
+        if (request_probability > 0.0 && (rand() / static_cast<double>(RAND_MAX)) < request_probability) {
+            total_requests_generated++;
+            Request r = generateRandomRequest(i, min_process_time, max_process_time);
+            if (processing_lb.getBlocker().isBlocked(r.ip_in)) {
+                total_requests_blocked++;
+            } else {
+                sw.routeRequest(r);
+            }
+        }
+        sw.runCycle(i);
     }
 
     LoadBalancerStats proc_stats = processing_lb.getStats();
@@ -129,10 +155,10 @@ int main() {
     log_stream << "Remaining in queue:  " << ending_queue_size << "\n";
     log_stream << "Active servers (busy): " << processing_lb.getBusyServerCount() + streaming_lb.getBusyServerCount() << "\n";
     log_stream << "Idle servers:        " << (processing_lb.getServerCount() - processing_lb.getBusyServerCount()) + (streaming_lb.getServerCount() - streaming_lb.getBusyServerCount()) << "\n";
-    log_stream << "Rejected/discarded:   " << proc_stats.total_requests_blocked + stream_stats.total_requests_blocked << " (blocked by IP)\n\n";
+    log_stream << "Rejected/discarded:   " << total_requests_blocked << " (blocked by IP)\n\n";
 
     log_stream << "--- Additional information ---\n";
-    log_stream << "Total requests generated: " << proc_stats.total_requests_generated + stream_stats.total_requests_generated << "\n";
+    log_stream << "Total requests generated: " << total_requests_generated << "\n";
     log_stream << "Total requests processed: " << proc_stats.total_requests_processed + stream_stats.total_requests_processed << "\n";
     log_stream << "Peak queue size (combined): " << proc_stats.peak_queue_size + stream_stats.peak_queue_size << "\n";
     log_stream << "Servers added (dynamic):   " << proc_stats.servers_added + stream_stats.servers_added << "\n";
