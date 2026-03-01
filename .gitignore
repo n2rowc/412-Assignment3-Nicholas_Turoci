@@ -1,10 +1,36 @@
-# Ignore design doc and assets
+# Created by build (make) — ignore all executables and object files
+myprogram
+lb_sim
+a.out
+*.exe
+*.out
+*.o
+build/
+
+# Created by running the program — ignore generated logs
+*.log
+load_balancer.log
+load_balancer.html
+
+# Doxygen HTML output (regenerate with: doxygen Doxyfile)
+html/
+
+# Pre-deliverable assets (hosted separately)
 predeliverables/
 
-# macOS noise
+# macOS
 .DS_Store
 
-# Build artifacts (future)
-*.o
-a.out
-*.log
+# Windows
+Thumbs.db
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Optional: backup/config variants (uncomment if you don't want these in repo)
+lb_config2.txt
+lb_config3.txt

@@ -53,7 +53,7 @@ int main() {
 
     srand(static_cast<unsigned int>(time(nullptr)));
     //open config file
-    ifstream config_file("lb_config.txt");
+    ifstream config_file("lb_config4.txt");
     if (!config_file.is_open()) {
         cerr << "Error: could not open config file" << endl;
         return 1;
