@@ -104,8 +104,8 @@ int main() {
     config_file.close();
 
     //create load balancer for processing and streaming
-    LoadBalancer processing_lb(initial_servers, min_queue_multiplier, max_queue_multiplier, scale_cooldown, min_process_time, max_process_time, request_probability);
-    LoadBalancer streaming_lb(initial_servers, min_queue_multiplier, max_queue_multiplier, scale_cooldown, min_process_time, max_process_time, request_probability);
+    LoadBalancer processing_lb(initial_servers, min_queue_multiplier, max_queue_multiplier, scale_cooldown);
+    LoadBalancer streaming_lb(initial_servers, min_queue_multiplier, max_queue_multiplier, scale_cooldown);
     
     //create switch to manage the two load balancers
     Switch sw(&processing_lb, &streaming_lb);

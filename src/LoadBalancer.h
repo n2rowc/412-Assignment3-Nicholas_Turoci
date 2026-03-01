@@ -47,17 +47,11 @@ public:
      * @param minQueueMultiplier Scale-down threshold (queue per server).
      * @param maxQueueMultiplier Scale-up threshold (queue per server).
      * @param scaleCooldown Cycles between scaling checks.
-     * @param minProcessTime Minimum request processing time (config).
-     * @param maxProcessTime Maximum request processing time (config).
-     * @param requestProbability Not used when request generation is in main.
      */
     LoadBalancer(int initialServers,
                  int minQueueMultiplier = 50,
                  int maxQueueMultiplier = 80,
-                 int scaleCooldown      = 10,
-                 int minProcessTime     = 5,
-                 int maxProcessTime     = 50,
-                 double requestProbability = 0.05);
+                 int scaleCooldown      = 10);
 
     /** @brief Add one web server to the pool. */
     void addServer();
@@ -106,9 +100,6 @@ private:
     int max_queue_multiplier_{80};
     int scale_cooldown_{10};
     int last_scale_time_{0};
-    int min_process_time_{5};
-    int max_process_time_{50};
-    double request_probability_{0.05};
 
     std::ostream* log_stream_{nullptr};
     std::ostream* log_html_{nullptr};

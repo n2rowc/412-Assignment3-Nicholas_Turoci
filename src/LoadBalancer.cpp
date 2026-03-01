@@ -10,10 +10,7 @@ using namespace std;
 LoadBalancer::LoadBalancer(int initialServers,
                            int minQueueMultiplier,
                            int maxQueueMultiplier,
-                           int scaleCooldown,
-                           int minProcessTime,
-                           int maxProcessTime,
-                           double requestProbability)
+                           int scaleCooldown)
     : request_queue_(),
       servers_(),
       ip_blocker_(),
@@ -22,9 +19,6 @@ LoadBalancer::LoadBalancer(int initialServers,
       max_queue_multiplier_{maxQueueMultiplier},
       scale_cooldown_{scaleCooldown},
       last_scale_time_{0},
-      min_process_time_{minProcessTime},
-      max_process_time_{maxProcessTime},
-      request_probability_{requestProbability},
       stats_{} {
     for (int i = 0; i < initialServers; i++) {
         servers_.push_back(new WebServer(i));
