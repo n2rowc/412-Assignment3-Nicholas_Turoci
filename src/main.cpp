@@ -53,7 +53,7 @@ int main() {
 
     srand(static_cast<unsigned int>(time(nullptr)));
     //open config file
-    ifstream config_file("lb_config4.txt");
+    ifstream config_file("lb_config3.txt");
     if (!config_file.is_open()) {
         cerr << "Error: could not open config file" << endl;
         return 1;
@@ -162,7 +162,8 @@ int main() {
     html_stream << "<h2>Simulation configuration</h2>\n<pre>Clock cycles:        " << simulation_time << "\n"
                 << "Initial servers:     " << initial_servers << " (per load balancer)\n"
                 << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n"
-                << "Request probability: " << request_probability << "</pre>\n\n";
+                << "Request probability: " << request_probability << "\n"
+                << "Scale cooldown:      " << scale_cooldown << "</pre>\n\n";
 
     log_stream << "========================================\n";
     log_stream << "Project 3 - Load Balancer Log\n";
@@ -172,7 +173,8 @@ int main() {
     log_stream << "Clock cycles:        " << simulation_time << "\n";
     log_stream << "Initial servers:     " << initial_servers << " (per load balancer)\n";
     log_stream << "Task time range:     " << min_process_time << " to " << max_process_time << " cycles\n";
-    log_stream << "Request probability: " << request_probability << "\n\n";
+    log_stream << "Request probability: " << request_probability << "\n";
+    log_stream << "Scale cooldown:      " << scale_cooldown << "\n\n";
 
     log_stream << "--- Basic logs ---\n";
     log_stream << "Starting queue size: " << starting_queue_size << "\n";
@@ -207,7 +209,7 @@ int main() {
 
     html_stream << "</div>\n\n";
 
-    log_stream << "--- End status ---\n";
+    log_stream << "\n--- End status ---\n";
     log_stream << "Ending queue size:    " << ending_queue_size << "\n";
     log_stream << "  (processing LB: " << processing_lb.getQueue().size() << ", streaming LB: " << streaming_lb.getQueue().size() << ")\n";
     log_stream << "Remaining in queue:  " << ending_queue_size << "\n";
